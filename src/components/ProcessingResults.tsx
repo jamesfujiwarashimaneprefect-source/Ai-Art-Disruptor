@@ -63,7 +63,7 @@ export function ProcessingResults({
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <p className="text-xs font-semibold text-gray-600 uppercase mb-3">Google Reverse Image</p>
+              <p className="text-xs font-semibold text-gray-600 uppercase mb-3">Reverse Image Search</p>
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -80,18 +80,18 @@ export function ProcessingResults({
             </div>
 
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <p className="text-xs font-semibold text-gray-600 uppercase mb-3">Grok 4.1</p>
+              <p className="text-xs font-semibold text-gray-600 uppercase mb-3">AI Model Training</p>
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-purple-500 h-2 rounded-full transition-all"
-                      style={{ width: `${result.effectiveness.grok41 * 100}%` }}
+                      className="bg-teal-500 h-2 rounded-full transition-all"
+                      style={{ width: `${result.effectiveness.aiModelTraining * 100}%` }}
                     />
                   </div>
                 </div>
                 <span className="text-lg font-bold text-gray-900 w-12">
-                  {(result.effectiveness.grok41 * 100).toFixed(0)}%
+                  {(result.effectiveness.aiModelTraining * 100).toFixed(0)}%
                 </span>
               </div>
             </div>
@@ -136,11 +136,11 @@ export function ProcessingResults({
         <div className="flex gap-3">
           <AlertCircle className="text-amber-600 flex-shrink-0 mt-0.5" size={18} />
           <div className="text-sm text-amber-800">
-            <p className="font-semibold mb-1">Testing Recommendations</p>
+            <p className="font-semibold mb-1">Important Notes</p>
             <ul className="list-disc list-inside space-y-1 text-xs">
-              <li>Test with Google Images reverse search to verify protection</li>
-              <li>Upload to Grok 4.1 and request image description</li>
-              <li>Use a different account to avoid recognition bias</li>
+              <li>Protection is not guaranteed against dedicated attacks</li>
+              <li>Tests show effectiveness on common reverse search and model inference</li>
+              <li>Add a watermark for additional legal protection</li>
             </ul>
           </div>
         </div>

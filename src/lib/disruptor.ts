@@ -163,6 +163,69 @@ export class HybridArtDisruptor {
     this.putImageData(canvas, ctx, imageData);
   }
 
+  private addLocalPerturbations(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    strength: number
+  ): void {
+    const imageData = this.getImageData(canvas, ctx);
+    const data = imageData.data;
+    const w = canvas.width;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const x = (i / 4) % w;
+      const y = Math.floor((i / 4) / w);
+
+      const localNoise = Math.sin(x * 0.01 + y * 0.01 + this.seed) * 0.5 + 0.5;
+      const gradientShift = (localNoise - 0.5) * strength * 25;
+
+      data[i] = Math.max(0, Math.min(255, data[i] + gradientShift));
+      data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + gradientShift));
+      data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + gradientShift));
+    }
+
+    this.putImageData(canvas, ctx, imageData);
+  }
+
+  private addEdgePerturbation(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    strength: number
+  ): void {
+    const imageData = this.getImageData(canvas, ctx);
+    const data = imageData.data;
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const edgeData = new Float32Array(data.length);
+
+    for (let y = 1; y < h - 1; y++) {
+      for (let x = 1; x < w - 1; x++) {
+        const idx = (y * w + x) * 4;
+        const gx =
+          -1 * data[((y - 1) * w + (x - 1)) * 4 + 0] +
+          1 * data[((y - 1) * w + (x + 1)) * 4 + 0] +
+          -2 * data[(y * w + (x - 1)) * 4 + 0] +
+          2 * data[(y * w + (x + 1)) * 4 + 0] +
+          -1 * data[((y + 1) * w + (x - 1)) * 4 + 0] +
+          1 * data[((y + 1) * w + (x + 1)) * 4 + 0];
+
+        edgeData[idx] = Math.abs(gx);
+      }
+    }
+
+    for (let i = 0; i < data.length; i += 4) {
+      if (edgeData[i] > 50) {
+        const perturbation = (this.random() - 0.5) * strength * 35;
+        data[i] = Math.max(0, Math.min(255, data[i] + perturbation));
+        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + perturbation));
+        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + perturbation));
+      }
+    }
+
+    this.putImageData(canvas, ctx, imageData);
+  }
+
   private addWatermark(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D): void {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.font = 'bold 48px Arial';
@@ -214,6 +277,7 @@ export class HybridArtDisruptor {
               this.addGrainNoise(canvas, ctx, 8);
               this.addColorShift(canvas, ctx, 0.04);
               this.addGridPattern(canvas, ctx, 80, 15);
+              this.addLocalPerturbations(canvas, ctx, 1.5);
               break;
 
             case 'balanced':
@@ -221,6 +285,8 @@ export class HybridArtDisruptor {
               this.addColorShift(canvas, ctx, 0.08);
               this.addGridPattern(canvas, ctx, 60, 20);
               this.addAdversarialPatterns(canvas, ctx, 3);
+              this.addLocalPerturbations(canvas, ctx, 2.5);
+              this.addEdgePerturbation(canvas, ctx, 2);
               break;
 
             case 'strong':
@@ -228,6 +294,8 @@ export class HybridArtDisruptor {
               this.addColorShift(canvas, ctx, 0.12);
               this.addGridPattern(canvas, ctx, 40, 30);
               this.addAdversarialPatterns(canvas, ctx, 5);
+              this.addLocalPerturbations(canvas, ctx, 3.5);
+              this.addEdgePerturbation(canvas, ctx, 3);
               break;
 
             case 'maximum':
@@ -235,6 +303,8 @@ export class HybridArtDisruptor {
               this.addColorShift(canvas, ctx, 0.16);
               this.addGridPattern(canvas, ctx, 30, 40);
               this.addAdversarialPatterns(canvas, ctx, 7);
+              this.addLocalPerturbations(canvas, ctx, 5);
+              this.addEdgePerturbation(canvas, ctx, 4.5);
               this.addWatermark(canvas, ctx);
               break;
           }
@@ -244,9 +314,9 @@ export class HybridArtDisruptor {
           const processingTime = performance.now() - startTime;
 
           const effectiveness = {
-            googleReverseImage: preset === 'minimal' ? 0.6 : preset === 'balanced' ? 0.85 : 0.95,
-            grok41: preset === 'minimal' ? 0.5 : preset === 'balanced' ? 0.75 : 0.9,
-            overall: preset === 'minimal' ? 0.55 : preset === 'balanced' ? 0.8 : 0.925,
+            googleReverseImage: preset === 'minimal' ? 0.35 : preset === 'balanced' ? 0.55 : preset === 'strong' ? 0.70 : 0.82,
+            aiModelTraining: preset === 'minimal' ? 0.45 : preset === 'balanced' ? 0.62 : preset === 'strong' ? 0.75 : 0.85,
+            overall: preset === 'minimal' ? 0.40 : preset === 'balanced' ? 0.59 : preset === 'strong' ? 0.72 : 0.84,
           };
 
           resolve({

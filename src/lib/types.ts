@@ -14,7 +14,7 @@ export interface ProcessingResult {
   processingTime: number;
   effectiveness: {
     googleReverseImage: number;
-    grok41: number;
+    aiModelTraining: number;
     overall: number;
   };
 }
